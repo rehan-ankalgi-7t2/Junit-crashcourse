@@ -3,6 +3,14 @@ package com.programming.techie;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ContactManagerTest {
@@ -84,6 +92,62 @@ class ContactManagerTest {
     public void shouldCreateContactOnDevMachine() {
         Assumptions.assumeFalse("DEV".equals(System.getProperty("ENV")));
         contactManager.addContact("John", "Doe", "0974112067");
+        Assertions.assertFalse(contactManager.getAllContacts().isEmpty());
+        Assertions.assertEquals(1, contactManager.getAllContacts().size());
+    }
+
+    @Nested
+    class RepeatedNestedTests {
+        @RepeatedTest(value = 5, name = "Repeated test {currentRepetition} of {totalRepetitions}")
+        @DisplayName("Repeated Tests")
+        public void shouldCreateContactRepeatedly() {
+            contactManager.addContact("John", "Doe", "0974112067");
+            Assertions.assertFalse(contactManager.getAllContacts().isEmpty());
+            Assertions.assertEquals(1, contactManager.getAllContacts().size());
+        }
+    }
+}
+
+@Nested
+class ParameterizedNestedTests {
+    ContactManager contactManager = new ContactManager();
+    @ParameterizedTest
+    @DisplayName("Parameterize test with @valueSource")
+    @ValueSource(strings = {"0974112067", "0741120672", "0234567890"})
+    public void shouldTestPhoneNumberUsingValueSource(String phoneNumber) {
+        contactManager.addContact("John", "Doe", phoneNumber);
+        Assertions.assertFalse(contactManager.getAllContacts().isEmpty());
+        Assertions.assertEquals(1, contactManager.getAllContacts().size());
+    }
+
+    @ParameterizedTest
+    @DisplayName("Parameterize test with @MethodSource")
+    @MethodSource("phoneNumberList")
+    public void shouldTestPhoneNumberUsingMethodSource(String phoneNumber) {
+        contactManager.addContact("John", "Doe", phoneNumber);
+        Assertions.assertFalse(contactManager.getAllContacts().isEmpty());
+        Assertions.assertEquals(1, contactManager.getAllContacts().size());
+    }
+
+    public static List<String> phoneNumberList () {
+        return Arrays.asList("0974112067", "0741120672", "0234567801");
+    }
+
+
+    @ParameterizedTest
+    @DisplayName("Parameterize test with @CsvSource")
+    @CsvSource({"0974112067", "0741120672", "0234567801"})
+    public void shouldTestPhoneNumberUsingCsvSource(String phoneNumber) {
+        contactManager.addContact("John", "Doe", phoneNumber);
+        Assertions.assertFalse(contactManager.getAllContacts().isEmpty());
+        Assertions.assertEquals(1, contactManager.getAllContacts().size());
+    }
+
+    @ParameterizedTest
+    @DisplayName("Parameterize test with @CsvSourceFile")
+    @CsvFileSource(resources = "/data.csv")
+    public void shouldTestPhoneNumberUsingCsvSourceFile(String phoneNumber) {
+        contactManager.addContact("John", "Doe", phoneNumber);
         Assertions.assertFalse(contactManager.getAllContacts().isEmpty());
         Assertions.assertEquals(1, contactManager.getAllContacts().size());
     }
